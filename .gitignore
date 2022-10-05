@@ -4,3 +4,4 @@ project_files/*
 temp/*
 *.ips
 *.sym
+*.bps

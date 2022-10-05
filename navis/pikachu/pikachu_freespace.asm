@@ -88,4 +88,11 @@ pikachu_fly_land_panel_parameters:
 	.word 0x0F8800A0
 	.word 0x00000020
 	.word 0x0F880080
+
+.align 4
+pikachu_opposing_alliance_parameters:
+	.word 0x04000000
+	.word 0x00000000
+	.word 0x08000000
+	.word 0x00000000
 ;eof

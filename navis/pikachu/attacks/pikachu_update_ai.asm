@@ -20,6 +20,46 @@ pikachu_update_ai:
 
 pikachu_update_ai_high_hp:
 	push r4-r7, r14
+	bl CheckIfOpposingAllianceInObjectRow
+	cmp r0, 0
+	bne @@useElecBeam
+	ldrb r0, [r5, 0x15]
+	cmp r0, 2
+	bne @@move
+	bl rng1_get_int
+	mov r1, 0x03
+	and r0, r1
+	beq @@useElecBeam
+@@move:
+	mov r0, PIKACHU_ATTACK_MOVE
+	bl object_setattack0
+	b @@done
+@@useElecBeam:
+	mov r0, 46 + 0x10 ; elec cross beam
+	bl object_setattack0
+	mov r0, 1
+	strb r0, [r7, 0xe]
+	str r0, [r7, 0x8]
+	ldr r0, =0x10f00
+	str r0, [r7, 0xc]
+	mov r0, 3
+	strb r0, [r7, 0x2]
+@@done:
+	pop r4-r7, r15
+	.pool
+
+;pikachu_update_ai_high_hp_old2:
+;	push r4-r7, r14
+;	bl CheckIfOpposingAllianceInObjectRow
+;	cmp r0, 0
+;	beq @@endroutine
+;	mov r0, PIKACHU_ATTACK_MOVE
+;	bl object_setattack0
+;@@endroutine:
+;	pop r4-r7, r15
+	
+pikachu_update_ai_high_hp_old:
+	push r4-r7, r14
 ;Find the opponent every time just in case
 	ldrb r0, [r5, 0x16]
 	mov r1, 0x01

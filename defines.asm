@@ -63,3 +63,7 @@
 .vdefinelabel illusion_object_spawn, 0x080E33FA, 0x080E7FD2
 .vdefinelabel illusion_object_no_flicker, 0x080E3422, 0x080E7FFA
 .vdefinelabel judgeman_choose_panel, 0x080FCCBC, 0x08102678
+
+.definelabel CheckIfOpposingAllianceInObjectRow, 0x8109746
+.definelabel armadilo_choose_panel, 0x81156AC
+.definelabel GetAllianceDependentPanelParamArgs, 0x81096FA
