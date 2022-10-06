@@ -80,8 +80,23 @@ pikachu_move_start:
 	mov r2, 1
 	cmp r0, r1
 	bgt @@gotPanelYOffset
-	bl object_exit_attack_state
-	b @@endroutine
+	; same row, but we have to move anyway for footsies to confuse opponent
+	cmp r1, 1
+	beq @@gotPanelYOffset
+	mov r2, -1
+	cmp r1, 3
+	beq @@gotPanelYOffset
+	; in center, 50/50
+	push r1
+	bl rng1_get_int
+	; random bit to avoid RNG carryover maybe
+	lsl r0, r0, 32-9
+	lsr r0, r0, 32-1
+	mov r2, -1
+	tst r0, r0
+	pop r1
+	beq @@gotPanelYOffset
+	mov r2, 1
 @@gotPanelYOffset:
 	add r1, r1, r2
 	strb r1, [r5, 0x15]

@@ -67,3 +67,4 @@
 .definelabel CheckIfOpposingAllianceInObjectRow, 0x8109746
 .definelabel armadilo_choose_panel, 0x81156AC
 .definelabel GetAllianceDependentPanelParamArgs, 0x81096FA
+.definelabel spawnChargeShotChargeObject_80E0F02, 0x80E0F02
