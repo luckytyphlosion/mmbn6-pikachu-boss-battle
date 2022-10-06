@@ -6,6 +6,7 @@ pikachu_move:
 	mov r14, r15
 	bx r1
 	bl pikachu_track_movement
+	bl pikachu_update_charge
 	pop r7, r15
 	.pool
 @@pikachu_move_pool:

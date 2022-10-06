@@ -7,9 +7,12 @@ oBattleObject_Alliance equ 0x16
 oBattleObject_RelatedObject1Ptr equ 0x4c
 oBattleObject_AIDataPtr equ 0x58
 
+oAIData_Unk_1d equ 0x1d
+oAIData_Unk_1e equ 0x1e
 oAIData_Unk_58 equ 0x58
 
 oAIState_CurState equ 0x0
+oAIState_ChargeTimer equ 0x2
 
 oAIAttackVars_playerObject_2c equ 0x2c
 
@@ -31,4 +34,4 @@ oTrackedMovement_OpponentPanelXY equ 2
 
 oTrackedMovement_Duration equ 4 ; 2 bytes
 
-TRACKED_MOVEMENT_MAX_ENTRIES equ 16
+TRACKED_MOVEMENT_MAX_ENTRIES equ 64

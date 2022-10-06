@@ -47,11 +47,21 @@ pikachu_update_ai_update:
 	ldrb r0, [r6, 0x1]
 	tst r0, r0
 	bne @@movementCountInitialized
+	ldr r4, [r5, oBattleObject_AIDataPtr]
+	; this sets charge
+	; timing is slightly off here
+	mov r0, 1
+	strb r0, [r4, oAIData_Unk_1d]
+	mov r0, 2
+	strb r0, [r4, oAIData_Unk_1e]
+	mov r0, 60
+	strb r0, [r6, oAIState_ChargeTimer]
 	; mov r0, 5
 	bl decay_random_number
 	add r0, r0, 6
 	strb r0, [r6, 0x1]
 @@movementCountInitialized:
+	bl pikachu_update_charge
 	ldrb r0, [r6, 0x1]
 	sub r0, r0, 1
 	strb r0, [r6, 0x1]
@@ -72,9 +82,14 @@ pikachu_update_ai_update:
 ;	strb r0, [r6, 0x1]
 @@move:
 	mov r0, PIKACHU_ATTACK_MOVE
-	bl object_setattack0
+	bl object_setattack4
 	b @@done
 @@useElecBeam:
+	ldr r4, [r5, oBattleObject_AIDataPtr]
+	; reset charge variables
+	mov r0, 0
+	strb r0, [r4, oAIData_Unk_1d]
+	strb r0, [r4, oAIData_Unk_1e]
 	mov r0, 46 + 0x10 ; elec cross beam
 	bl object_setattack0
 	mov r0, 60 ; damage
@@ -88,6 +103,21 @@ pikachu_update_ai_update:
 	bl pikachu_track_movement
 	pop r4-r7, r15
 	.pool
+
+pikachu_update_charge:
+	push r4, r14
+	ldrb r0, [r6, oAIState_ChargeTimer]
+	tst r0, r0
+	beq @@dontSetCharge
+	sub r0, r0, 1
+	strb r0, [r6, oAIState_ChargeTimer]
+	bne @@dontSetCharge
+	ldr r4, [r5, oBattleObject_AIDataPtr]
+	; charge is ready
+	mov r0, 2
+	strb r0, [r4, oAIData_Unk_1d]
+@@dontSetCharge:
+	pop r4, r15
 
 mod2n_random_number_flushed:
 	push r4, r5, r15
@@ -121,10 +151,13 @@ decay_random_number:
 	mov r4, 0
 @@loop:
 	bl rng1_get_int
-	lsl r1, r0, 32-2
-	lsr r1, r1, 32-2
+	lsl r1, r0, 32-3
+	lsr r1, r1, 32-3
 	cmp r1, 2
-	beq @exitLoop
+	blt @@stayInLoop
+	cmp r1, 4
+	ble @@exitLoop
+@@stayInLoop:
 	add r4, 1
 	lsl r0, r0, 32-5
 	lsr r5, r0, 32-2
@@ -134,7 +167,7 @@ decay_random_number:
 	sub r5, r5, 1
 	bne @@flushRNGLoop
 	b @@loop
-@exitLoop:
+@@exitLoop:
 	mov r0, r4
 	pop r4, r5, r15
 
