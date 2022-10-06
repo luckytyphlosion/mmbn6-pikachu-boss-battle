@@ -23,6 +23,7 @@
 	.include "macros/map_flag_listener_macros.asm"
 	.include "macros/map_cutscene_macros.asm"
 	.include "macros/chip_macros.asm"
+	.include "macros/struct_macros.asm"
 
 	.include "defines.asm"
 

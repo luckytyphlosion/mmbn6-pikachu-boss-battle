@@ -3,6 +3,7 @@
 ;pikachu attacks
 	.include "attacks/pikachu_update_ai.asm"
 	.include "attacks/pikachu_move.asm"
+	.include "attacks/pikachu_track_movement.asm"
 	.include "attacks/pikachu_thunderball.asm"
 	.include "attacks/pikachu_iron_tail.asm"
 	.include "attacks/pikachu_thunder.asm"

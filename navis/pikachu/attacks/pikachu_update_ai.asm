@@ -17,10 +17,30 @@ pikachu_update_ai:
 	pop r4, r6, r15
 	.pool
 @@pikachu_update_ai_pool:
-	;.word pikachu_update_ai_init
+	.word pikachu_update_ai_init|1
 	.word pikachu_update_ai_update|1
-	;.word pikachu_update_ai_high_hp|1;00
-	.word pikachu_update_ai_low_hp|1;04
+
+pikachu_update_ai_init:
+	push r4-r7, r14
+	ldr r4, [r5, oBattleObject_AIDataPtr]
+	add r4, oAIData_Unk_58
+	push r7
+	mov r7, r4
+	bl spawnChargeShotChargeObject_80E0F02
+	pop r7
+
+	; use shop data as scratch for tracked movement
+	ldr r0, =eToolkit_ShopData
+	; get 0xe80, which is 4 bytes less than the total area we can use
+	; which is good enough for our purposes
+	mov r1, 0xe8
+	lsl r1, r1, 4
+	bl ZeroFillByEightWords
+
+	mov r0, AI_STATE_UPDATE
+	str r0, [r6, oAIState_CurState]
+	bl pikachu_update_ai_update
+	pop r4-r7, r14
 
 pikachu_update_ai_update:
 	push r4-r7, r14
@@ -65,8 +85,36 @@ pikachu_update_ai_update:
 	mov r0, 3
 	strb r0, [r7, 0x2]
 @@done:
+	bl pikachu_track_movement
 	pop r4-r7, r15
 	.pool
+
+mod2n_random_number_flushed:
+	push r4, r5, r15
+	mov r4, r0
+	bl rng1_get_int
+	; get bits for flush count
+	mov r2, r0
+	lsr r2, r4
+	lsl r2, r2, 32-2
+	lsr r2, r2, 32-2
+	; get random bits
+	mov r1, 1
+	sub r4, r4, 1
+	lsl r1, r4
+	sub r1, r1, 1
+	and r0, r1
+	; save in r4
+	mov r4, r0
+	; get flush count
+	mov r5, r2
+	add r5, 1
+@@flushRNGLoop:
+	bl rng1_get_int
+	sub r5, r5, 1
+	bne @@flushRNGLoop
+	mov r0, r4
+	pop r4, r5, r15
 
 decay_random_number:
 	push r4, r5, r15
