@@ -100,7 +100,6 @@ pikachu_update_ai_update:
 	mov r0, 3
 	strb r0, [r7, 0x2]
 @@done:
-	bl pikachu_track_movement
 	pop r4-r7, r15
 	.pool
 
@@ -151,13 +150,10 @@ decay_random_number:
 	mov r4, 0
 @@loop:
 	bl rng1_get_int
-	lsl r1, r0, 32-3
-	lsr r1, r1, 32-3
+	lsl r1, r0, 32-2
+	lsr r1, r1, 32-2
 	cmp r1, 2
-	blt @@stayInLoop
-	cmp r1, 4
-	ble @@exitLoop
-@@stayInLoop:
+	beq @@exitLoop
 	add r4, 1
 	lsl r0, r0, 32-5
 	lsr r5, r0, 32-2

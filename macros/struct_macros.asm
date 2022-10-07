@@ -10,6 +10,8 @@ oBattleObject_AIDataPtr equ 0x58
 oAIData_Unk_1d equ 0x1d
 oAIData_Unk_1e equ 0x1e
 oAIData_Unk_58 equ 0x58
+oAIData_AIState equ 0x80
+oAIData_AttackVars equ 0xa0
 
 oAIState_CurState equ 0x0
 oAIState_ChargeTimer equ 0x2

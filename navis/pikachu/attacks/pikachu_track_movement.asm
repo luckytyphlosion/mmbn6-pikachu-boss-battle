@@ -4,6 +4,22 @@ pikachu_track_movement:
 	mov r0, r8
 	push r0
 
+	bl battle_is_paused
+	bne @@done
+	bl battle_is_timestop
+	bne @@done
+
+	ldr r4, [r5, oBattleObject_AIDataPtr]
+	mov r6, oAIData_AIState
+	add r6, r6, r4 ; r6 = AI state
+	mov r7, oAIData_AttackVars
+	add r7, r7, r4 ; r7 = current attack variable region
+
+	; don't do anything if we haven't initialized the AI
+	ldrb r0, [r6, oAIState_CurState]
+	tst r0, r0
+	beq @@done
+
 	; Find the opponent every time just in case
 	ldrb r0, [r5, oBattleObject_Alliance]
 	mov r1, 1
@@ -43,7 +59,6 @@ pikachu_track_movement:
 	; increment entry count if not at max
 	add r0, r0, 1
 	strh r0, [r3]
-	sub r0, r0, 1
 	b @@addNewEntry_gotEntryIndex
 @@addNewEntry_atMaxEntries:
 	ldrh r0, [r3, 2] ; eTrackedMovementStartPos
@@ -51,9 +66,14 @@ pikachu_track_movement:
 	cmp r0, TRACKED_MOVEMENT_MAX_ENTRIES
 	blt @@addNewEntry_dontResetStartPos
 	mov r0, 0
+	strh r0, [r3, 2]
+	mov r0, TRACKED_MOVEMENT_MAX_ENTRIES
+	b @@addNewEntry_gotEntryIndex_noDecrement
 @@addNewEntry_dontResetStartPos:
 	strh r0, [r3, 2]
 @@addNewEntry_gotEntryIndex:
+	sub r0, r0, 1
+@@addNewEntry_gotEntryIndex_noDecrement:
 	lsl r0, r0, 3
 	add r3, r3, r0
 	add r3, r3, 4

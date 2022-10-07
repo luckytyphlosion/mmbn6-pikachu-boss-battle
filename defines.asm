@@ -65,6 +65,8 @@
 .vdefinelabel judgeman_choose_panel, 0x080FCCBC, 0x08102678
 
 .definelabel ZeroFillByEightWords, 0x08000900
+.definelabel battle_is_paused, 0x0800a03c
+.definelabel battle_is_timestop, 0x0800a098
 .definelabel object_setattack4, 0x08011690
 .definelabel CheckIfOpposingAllianceInObjectRow, 0x8109746
 .definelabel armadilo_choose_panel, 0x81156AC
