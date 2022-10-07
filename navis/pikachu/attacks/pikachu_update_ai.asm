@@ -6,6 +6,7 @@
 ;r6 + 0x04 - bigAttackSwap
 
 AI_STATE_UPDATE equ 0x4
+ELEC_CROSS equ 0
 
 pikachu_update_ai:
 	push r4, r6, r14
@@ -54,11 +55,19 @@ pikachu_update_ai_update:
 	strb r0, [r4, oAIData_Unk_1d]
 	mov r0, 2
 	strb r0, [r4, oAIData_Unk_1e]
+	.if ELEC_CROSS
 	mov r0, 60
+	.else
+	mov r0, 80
+	.endif
 	strb r0, [r6, oAIState_ChargeTimer]
 	; mov r0, 5
 	bl decay_random_number
+	.if ELEC_CROSS
 	add r0, r0, 6
+	.else
+	add r0, r0, 7
+	.endif
 	strb r0, [r6, 0x1]
 @@movementCountInitialized:
 	bl pikachu_update_charge
@@ -90,15 +99,26 @@ pikachu_update_ai_update:
 	mov r0, 0
 	strb r0, [r4, oAIData_Unk_1d]
 	strb r0, [r4, oAIData_Unk_1e]
+	.if ELEC_CROSS
 	mov r0, 46 + 0x10 ; elec cross beam
 	bl object_setattack0
-	mov r0, 60 ; damage
+	mov r0, 1 ; elec cross specifically
 	strb r0, [r7, 0xe]
+	mov r0, 60 ; damage
 	str r0, [r7, 0x8]
 	ldr r0, =0x10f00
 	str r0, [r7, 0xc]
 	mov r0, 3
 	strb r0, [r7, 0x2]
+	.else
+	mov r0, 0x35 + 0x10 ; erase beam
+	bl object_setattack0
+	mov r0, 60 ; damage
+	str r0, [r7, 0x8]
+	mov r0, 0
+	strb r0, [r7, 0x2]
+	strb r0, [r7, 0x3]
+	.endif
 @@done:
 	pop r4-r7, r15
 	.pool
