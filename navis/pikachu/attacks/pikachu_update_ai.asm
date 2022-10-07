@@ -90,10 +90,19 @@ pikachu_update_ai_update:
 	mov r0, 0
 	strb r0, [r4, oAIData_Unk_1d]
 	strb r0, [r4, oAIData_Unk_1e]
+	ldr r1, =0x203fffc
+	ldr r1, [r1]
 	mov r0, 46 + 0x10 ; elec cross beam
+	tst r1, r1
+	bne @@elecCrossBeam
+	mov r0, 8
+	strb r0, [r7, 0x3]
+	mov r0, 0x12
+@@elecCrossBeam:
 	bl object_setattack0
-	mov r0, 60 ; damage
+	mov r0, 1
 	strb r0, [r7, 0xe]
+	mov r0, 60 ; damage
 	str r0, [r7, 0x8]
 	ldr r0, =0x10f00
 	str r0, [r7, 0xc]
