@@ -78,11 +78,11 @@ lans_room_pikachu_battle:
 	.byte 0x00 ;byte1
 	.byte 0x15 ;Music
 	.byte 0x00 ;Battle Mode
-	.byte 0x04 ;Background (Sky HP)
+	.byte 0x07 ;Background (Generic Comp)
 	.byte 0x00 ;Battle Count
 	.byte 0x38 ;Panel pattern
 	.byte 0x00 ;byte7
-	.word 0x004198D7
+	.word 0x004198D7 | 0x20
 	.word lans_room_pikachu_battle_layout
 
 .align 4
@@ -94,15 +94,8 @@ lans_room_pikachu_battle_layout:
 	.byte 0xF0
 
 lans_room_init_flag_listener_hook:
-	FL_JUMP_IF_FLAG_NOT_ON 0x130F, @@no_pikachu_battle
-	FL_JUMP_IF_PREVIOUS_BATTLE_OUTCOME_NOT_EQUAL 0x01, @@failedBattle
-	FL_START_CUTSCENE lans_room_after_battle_pikachu_cutscene, 0x00000003
-	FL_JUMP @LANS_ROOM_FL_INIT_END
-@@failedBattle:
-	FL_START_CUTSCENE lans_room_after_battle_pikachu_cutscene, 0x00000004
-	FL_JUMP @LANS_ROOM_FL_INIT_END
-@@no_pikachu_battle:
 ;return to regular code
+	FL_CLEAR_FLAG 0x130f
 	FL_JUMP_IF_PROGRESS_BETWEEN 0x00, 0x0F, @LANS_ROOM_FL_INIT_RESUME1
 	FL_JUMP @LANS_ROOM_FL_INIT_RESUME2
 ;eof

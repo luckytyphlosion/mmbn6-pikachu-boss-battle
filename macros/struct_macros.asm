@@ -2,8 +2,12 @@
 oBattleObject_PanelX equ 0x12
 oBattleObject_PanelY equ 0x13
 oBattleObject_PanelXY equ 0x12
-	
+oBattleObject_FuturePanelX equ 0x14
+oBattleObject_FuturePanelY equ 0x15
+
 oBattleObject_Alliance equ 0x16
+oBattleObject_HP equ 0x24
+oBattleObject_MaxHP equ 0x26
 oBattleObject_RelatedObject1Ptr equ 0x4c
 oBattleObject_AIDataPtr equ 0x58
 
@@ -37,3 +41,20 @@ oTrackedMovement_OpponentPanelXY equ 2
 oTrackedMovement_Duration equ 4 ; 2 bytes
 
 TRACKED_MOVEMENT_MAX_ENTRIES equ 64
+
+oToolkit_JoypadPtr equ 0x4
+oJoypad_Held equ 0x0
+oJoypad_Pressed equ 0x2
+
+JOYPAD_DEFAULT equ 0xFC00
+JOYPAD_A equ 0x0001
+JOYPAD_B equ 0x0002
+JOYPAD_SELECT equ 0x0004
+JOYPAD_START equ 0x0008
+JOYPAD_RIGHT equ 0x0010
+JOYPAD_LEFT equ 0x0020
+JOYPAD_UP equ 0x0040
+JOYPAD_DOWN equ 0x0080
+JOYPAD_ARROWS equ JOYPAD_RIGHT | JOYPAD_LEFT | JOYPAD_UP | JOYPAD_DOWN
+JOYPAD_R equ 0x0100
+JOYPAD_L equ 0x0200

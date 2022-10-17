@@ -39,7 +39,7 @@
 
 ;update 3
 .vorg 0x080F25A0 + (PIKACHU_AI_ID * 4), 0x080F7F48 + (PIKACHU_AI_ID * 4)
-	.word pikachu_track_movement|1
+	.vword 0x080F28C1, 0x080F82D9;Generic nop
 
 ;attack pool
 .vorg 0x080F23AC + (PIKACHU_AI_ID * 4), 0x080F7D54 + (PIKACHU_AI_ID * 4)

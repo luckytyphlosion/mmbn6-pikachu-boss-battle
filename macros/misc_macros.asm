@@ -1,0 +1,1 @@
+	PIKACHU_HP equ 2500

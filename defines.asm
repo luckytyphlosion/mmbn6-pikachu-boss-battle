@@ -67,8 +67,11 @@
 .definelabel ZeroFillByEightWords, 0x08000900
 .definelabel battle_is_paused, 0x0800a03c
 .definelabel battle_is_timestop, 0x0800a098
+.definelabel battle_clear_flags, 0x0800a2e4
 .definelabel object_setattack4, 0x08011690
 .definelabel CheckIfOpposingAllianceInObjectRow, 0x8109746
 .definelabel armadilo_choose_panel, 0x81156AC
 .definelabel GetAllianceDependentPanelParamArgs, 0x81096FA
 .definelabel spawnChargeShotChargeObject_80E0F02, 0x80E0F02
+.definelabel SetCustGauge, 0x801DFA2
+.definelabel SHUFFLE_FOLDER_SLICE_ADDR, 0x8000d12

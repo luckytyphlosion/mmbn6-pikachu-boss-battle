@@ -18,174 +18,51 @@ pikachu_update_ai:
 	pop r4, r6, r15
 	.pool
 @@pikachu_update_ai_pool:
-	.word pikachu_update_ai_init|1
-	.word pikachu_update_ai_update|1
+	.word pikachu_update_ai_main|1
 
-pikachu_update_ai_init:
+pikachu_update_ai_main:
 	push r4-r7, r14
-	ldr r4, [r5, oBattleObject_AIDataPtr]
-	add r4, oAIData_Unk_58
-	push r7
-	mov r7, r4
-	bl spawnChargeShotChargeObject_80E0F02
-	pop r7
-
-	; use shop data as scratch for tracked movement
-	ldr r0, =eToolkit_ShopData
-	; get 0xe80, which is 4 bytes less than the total area we can use
-	; which is good enough for our purposes
-	mov r1, 0xe8
-	lsl r1, r1, 4
-	bl ZeroFillByEightWords
-
-	mov r0, AI_STATE_UPDATE
-	str r0, [r6, oAIState_CurState]
-	bl pikachu_update_ai_update
-	pop r4-r7, r14
-
-pikachu_update_ai_update:
-	push r4-r7, r14
-	ldrb r0, [r6, 0x1]
-	tst r0, r0
-	bne @@movementCountInitialized
-	ldr r4, [r5, oBattleObject_AIDataPtr]
-	; this sets charge
-	; timing is slightly off here
-	mov r0, 1
-	strb r0, [r4, oAIData_Unk_1d]
-	mov r0, 2
-	strb r0, [r4, oAIData_Unk_1e]
-	.if ELEC_CROSS
-	mov r0, 60
-	.else
-	mov r0, 80
-	.endif
-	strb r0, [r6, oAIState_ChargeTimer]
-	; mov r0, 5
-	bl decay_random_number
-	.if ELEC_CROSS
-	add r0, r0, 6
-	.else
-	add r0, r0, 7
-	.endif
-	strb r0, [r6, 0x1]
-@@movementCountInitialized:
-	bl pikachu_update_charge
-	ldrb r0, [r6, 0x1]
-	sub r0, r0, 1
-	strb r0, [r6, 0x1]
-	bne @@move
-	b @@useElecBeam
-;	bl CheckIfOpposingAllianceInObjectRow
-;	cmp r0, 0
-;	bne @@useElecBeam
-;	ldrb r0, [r5, 0x15]
-;	cmp r0, 2
-;	bne @@addToTimerThenMove
-;	bl rng1_get_int
-;	mov r1, 0x03
-;	and r0, r1
-;	beq @@useElecBeam
-;@@addToTimerThenMove:
-;	mov r0, 1
-;	strb r0, [r6, 0x1]
-@@move:
+	mov r4, r10
+	ldr r4, [r4, oToolkit_JoypadPtr]
+	ldrh r0, [r4, oJoypad_Held]
+	mov r1, JOYPAD_SELECT
+	tst r0, r1
+	beq @@noMovement
+	mov r2, 0
+	mov r1, JOYPAD_UP
+	tst r0, r1
+	bne @@gotDirection
+	mov r2, 1
+	mov r1, JOYPAD_DOWN
+	tst r0, r1
+	bne @@gotDirection
+	mov r2, 2
+	mov r1, JOYPAD_LEFT
+	tst r0, r1
+	bne @@gotDirection
+	mov r2, 3
+	mov r1, JOYPAD_RIGHT
+	tst r0, r1
+	bne @@gotDirection
+	mov r1, JOYPAD_A
+	tst r0, r1
+	beq @@noMovement
+	ldr r0, =PIKACHU_HP
+	strh r0, [r5, oBattleObject_HP]
+	ldrb r0, [r5, oBattleObject_Alliance]
+	mov r1, 0x1
+	eor r0, r1
+	bl battle_find_player
+	ldrh r1, [r0, oBattleObject_MaxHP]
+	strh r1, [r0, oBattleObject_HP]
+	b @@noMovement
+@@gotDirection:
+	strb r2, [r7, 0xc]
 	mov r0, PIKACHU_ATTACK_MOVE
 	bl object_setattack4
-	b @@done
-@@useElecBeam:
-	ldr r4, [r5, oBattleObject_AIDataPtr]
-	; reset charge variables
-	mov r0, 0
-	strb r0, [r4, oAIData_Unk_1d]
-	strb r0, [r4, oAIData_Unk_1e]
-	.if ELEC_CROSS
-	mov r0, 46 + 0x10 ; elec cross beam
-	bl object_setattack0
-	mov r0, 1 ; elec cross specifically
-	strb r0, [r7, 0xe]
-	mov r0, 60 ; damage
-	str r0, [r7, 0x8]
-	ldr r0, =0x10f00
-	str r0, [r7, 0xc]
-	mov r0, 3
-	strb r0, [r7, 0x2]
-	.else
-	mov r0, 0x35 + 0x10 ; erase beam
-	bl object_setattack0
-	mov r0, 60 ; damage
-	str r0, [r7, 0x8]
-	mov r0, 0
-	strb r0, [r7, 0x2]
-	strb r0, [r7, 0x3]
-	.endif
-@@done:
+@@noMovement:
 	pop r4-r7, r15
 	.pool
-
-pikachu_update_charge:
-	push r4, r14
-	ldrb r0, [r6, oAIState_ChargeTimer]
-	tst r0, r0
-	beq @@dontSetCharge
-	sub r0, r0, 1
-	strb r0, [r6, oAIState_ChargeTimer]
-	bne @@dontSetCharge
-	ldr r4, [r5, oBattleObject_AIDataPtr]
-	; charge is ready
-	mov r0, 2
-	strb r0, [r4, oAIData_Unk_1d]
-@@dontSetCharge:
-	pop r4, r15
-
-mod2n_random_number_flushed:
-	push r4, r5, r15
-	mov r4, r0
-	bl rng1_get_int
-	; get bits for flush count
-	mov r2, r0
-	lsr r2, r4
-	lsl r2, r2, 32-2
-	lsr r2, r2, 32-2
-	; get random bits
-	mov r1, 1
-	sub r4, r4, 1
-	lsl r1, r4
-	sub r1, r1, 1
-	and r0, r1
-	; save in r4
-	mov r4, r0
-	; get flush count
-	mov r5, r2
-	add r5, 1
-@@flushRNGLoop:
-	bl rng1_get_int
-	sub r5, r5, 1
-	bne @@flushRNGLoop
-	mov r0, r4
-	pop r4, r5, r15
-
-decay_random_number:
-	push r4, r5, r15
-	mov r4, 0
-@@loop:
-	bl rng1_get_int
-	lsl r1, r0, 32-2
-	lsr r1, r1, 32-2
-	cmp r1, 2
-	beq @@exitLoop
-	add r4, 1
-	lsl r0, r0, 32-5
-	lsr r5, r0, 32-2
-	add r5, 1
-@@flushRNGLoop:
-	bl rng1_get_int
-	sub r5, r5, 1
-	bne @@flushRNGLoop
-	b @@loop
-@@exitLoop:
-	mov r0, r4
-	pop r4, r5, r15
 
 ;pikachu_update_ai_high_hp_old2:
 ;	push r4-r7, r14

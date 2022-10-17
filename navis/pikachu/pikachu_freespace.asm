@@ -15,7 +15,7 @@ pikachu_ai_struct1:
 
 .align 4
 pikachu_ai_struct2:
-	.halfword (AttackElement_Elec << 12) | 2500;hp + element
+	.halfword (AttackElement_Elec << 12) | PIKACHU_HP ;hp + element
 	.byte 0x00;version
 	.byte 0x00;collision_flags
 	.halfword 0x000A;collision_damage
@@ -95,4 +95,20 @@ pikachu_opposing_alliance_parameters:
 	.word 0x00000000
 	.word 0x08000000
 	.word 0x00000000
+
+; hack way of preventing player megaman from moving while moving enemy megaman
+PatchTransferJoypad:
+	ldr r5, =0x2036780
+	mov r0, r10
+	ldr r0, [r0, oToolkit_JoypadPtr]
+	ldrh r1, [r0, oJoypad_Held]
+	mov r0, JOYPAD_SELECT
+	tst r1, r0
+	beq @@keepPlayerInputs
+	mov r1, 0
+@@keepPlayerInputs:
+	ldr r0, =0x801FF8C|1
+	bx r0
+	.pool
+
 ;eof

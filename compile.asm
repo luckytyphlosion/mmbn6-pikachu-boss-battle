@@ -24,6 +24,7 @@
 	.include "macros/map_cutscene_macros.asm"
 	.include "macros/chip_macros.asm"
 	.include "macros/struct_macros.asm"
+	.include "macros/misc_macros.asm"
 
 	.include "defines.asm"
 
@@ -54,5 +55,6 @@
 	.include "map/map_freespace.asm"
 	.include "chips/chips_freespace.asm"
 	.include "text/text_freespace.asm"
+	.include "allstars/allstars_freespace.asm"
 .close
 ;eof

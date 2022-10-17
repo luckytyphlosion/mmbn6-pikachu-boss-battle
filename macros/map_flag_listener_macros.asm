@@ -19,6 +19,11 @@
   .word jump_address
 .endmacro
 
+.macro FL_CLEAR_FLAG,flag
+.byte 0x20, 0xFF
+  .halfword flag
+.endmacro
+
 .macro FL_START_CUTSCENE,cutscene_offset,parameter
 .byte 0x26
   .word cutscene_offset

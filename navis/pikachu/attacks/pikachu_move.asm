@@ -5,54 +5,12 @@ pikachu_move:
 	ldr r1, [r0, r1]
 	mov r14, r15
 	bx r1
-	bl pikachu_update_charge
 	pop r7, r15
 	.pool
 @@pikachu_move_pool:
-	.word pikachu_move_start_idle|1
 	.word pikachu_move_start|1
 	.word pikachu_move_end|1
 	.word pikachu_move_end_idle|1
-
-pikachu_move_start_idle:
-	push r14
-	mov r0, 0x04
-	strh r0, [r7, 0x00]
-	bl pikachu_move_start
-	pop r15
-
-;	push r14
-;	ldrb r0, [r7, 0x01]
-;	tst r0, r0
-;	bne @@step_initialized
-;	; check if panel Y is 2 before deciding whether to fake out
-;	ldrb r0, [r5, 0x15]
-;	cmp r0, 2
-;	bne @@noDelay
-;	bl rng1_get_int
-;	lsl r1, r0, 32-2
-;	lsr r1, r1, 32-2
-;	tst r1, r1
-;	bne @@noDelay
-;	mov r0, 0x04 
-;	strb r0, [r7, 0x01]
-;	mov r0, 13
-;	strh r0, [r7, 0x10]
-;	b @@endroutine
-;@@step_initialized:
-;	ldrh r0, [r7,0x10]
-;	sub r0, 0x01
-;	strb r0, [r7,0x10]
-;	bgt @@endroutine
-;	mov r0, 0x04
-;	strh r0, [r7, 0x00]
-;	b @@endroutine
-;@@noDelay:
-;	mov r0, 0x04
-;	strh r0, [r7, 0x00]
-;	bl pikachu_move_start
-;@@endroutine:
-;	pop r15
 
 pikachu_move_start:
 	push r4,r14
@@ -62,46 +20,38 @@ pikachu_move_start:
 	mov r0, 0x04
 	strb r0, [r7, 0x01]
 	bl object_can_move
-	beq @@cantmove
-;Get move parameters based on which side pikachu is on
-	bl FindPanelYOfFirstOpposingAllianceInFrontOfObject
-	tst r0, r0
-	bne @@foundPanelY
-@@cantmove:
-	mov r0, 0x08
-	strh r0, [r7, 0x00]
-	b @@endroutine
-@@foundPanelY:
-	ldrb r1, [r5, 0x15]
-	; r0 = opposing panel y
-	; r1 = object panel y
-	mov r2, -1 ; minus 1 from current panel
-	cmp r0, r1
-	blt @@gotPanelYOffset
+	beq @@doNotMove
+; get movement direction
+	ldr r1, =@@DirectionToPanelOffsets
+	ldrb r0, [r7, 0xc]
+	lsl r0, r0, 1
+	add r1, r1, r0
+	; get panel offsets
+	mov r2, 0
+	ldrsb r0, [r1, r2]
 	mov r2, 1
-	cmp r0, r1
-	bgt @@gotPanelYOffset
-	; same row, but we have to move anyway for footsies to confuse opponent
-	cmp r1, 1
-	beq @@gotPanelYOffset
-	mov r2, -1
-	cmp r1, 3
-	beq @@gotPanelYOffset
-	; in center, 50/50
-	push r1
-	bl rng1_get_int
-	; random bit to avoid RNG carryover maybe
-	lsl r0, r0, 32-9
-	lsr r0, r0, 32-1
-	mov r2, -1
-	tst r0, r0
-	pop r1
-	beq @@gotPanelYOffset
-	mov r2, 1
-@@gotPanelYOffset:
-	add r1, r1, r2
-	strb r1, [r5, 0x15]
-	ldrb r0, [r5, 0x14]
+	ldrsb r1, [r1, r2]
+
+	; panel x, y
+	ldrb r2, [r5, oBattleObject_PanelX]
+	ldrb r3, [r5, oBattleObject_PanelY]
+	add r2, r2, r0
+	add r4, r2, 1 ; negative check
+	beq @@doNotMove
+	cmp r2, 8
+	bge @@doNotMove
+
+	add r3, r3, r1
+	add r4, r3, 1 ; negative check
+	beq @@doNotMove
+	cmp r3, 5
+	bge @@doNotMove
+
+	mov r0, r2
+	mov r1, r3
+
+	strb r0, [r5, oBattleObject_FuturePanelX]
+	strb r1, [r5, oBattleObject_FuturePanelY]
 	bl object_reserve_panel
 	mov r0, 0x40
 	bl object_set_flag
@@ -114,10 +64,20 @@ pikachu_move_start:
 	sub r0,1
 	strb r0, [r7, 0x10]
 	bge @@endroutine
-	mov r0, 0x08
+	mov r0, 0x04
 	strh r0, [r7, 0x00]
+	b @@endroutine
+@@doNotMove:
+	bl object_exit_attack_state
 @@endroutine:
 	pop r4,r15
+
+	.align 4
+@@DirectionToPanelOffsets:
+	.byte 0, -1
+	.byte 0, 1
+	.byte -1, 0
+	.byte 1, 0
 
 FindPanelYOfFirstOpposingAllianceInFrontOfObject:
 	push r4,r6,r7,lr
@@ -182,7 +142,7 @@ pikachu_move_end:
 	sub r0, 0x01
 	strh r0, [r7, 0x10]
 	bgt @@endroutine
-	mov r0, 0x0c
+	mov r0, 0x08
 	strh r0, [r7, 0x00]
 @@endroutine:
 	pop r4,r15
@@ -196,7 +156,7 @@ pikachu_move_end_idle:
 	strb r0, [r7, 0x01]
 	mov r0, PIKACHU_ANIMATION_IDLE
 	strb r0, [r5, 0x10]
-	mov r0, 7
+	mov r0, 5
 	strh r0, [r7, 0x10]
 	b @@endroutine
 @@step_initialized:
